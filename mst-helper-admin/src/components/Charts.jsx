@@ -5,6 +5,7 @@ import Chart2 from '../containers/Chart2';
 import Chart3 from '../containers/Chart3';
 import AllFuncsByDate from '../containers/AllFuncsByDate';
 import AllFuncsWithinRange from '../containers/AllFuncsWithinRange';
+import SubtotalWithinRangeByTimeUnit from '../containers/SubtotalWithinRangeByTimeUnit';
 import URLContext from '../state/context';
 import { Layout, BackTop, Menu } from 'antd';
 import 'antd/dist/antd.css';
@@ -77,6 +78,11 @@ export default function Charts() {
                             seriesName={charts.chart2.seriesName}
                             selectDetail={'users'}
                             selectDefaultValue={0}
+                        />
+                        <SubtotalWithinRangeByTimeUnit
+                            eleID={charts.api10.id}
+                            url={charts.api10.url}
+                            seriesName={charts.api10.seriesName}
                         />
                         <Chart3
                             eleID={charts.chart3.id}

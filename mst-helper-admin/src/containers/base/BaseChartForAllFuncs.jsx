@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../../assets/css/charts.css';
 import echarts from 'echarts';
-import {Button} from 'antd'
+import { Button } from 'antd'
 
 /**
  * 该组件只和图表样式相关（用于展示所有功能使用量的图表）
@@ -13,7 +13,7 @@ import {Button} from 'antd'
  */
 
 /* 请求数据，返回值会用做 状态 */
-async function getOption(url, seriesName, roseType) {
+async function getOption(url, seriesName, roseType, showLabel) {
     let option = {};
     await axios({
         method: 'GET',
@@ -24,6 +24,15 @@ async function getOption(url, seriesName, roseType) {
     }).then((response) => {
         let data = response.data;
         // console.log(data);
+        //计算该图表中所有小计 总和
+        let values = data.map((item) => { return Object.values(item) });
+        let total = 0;
+        let counts = values.map((item) => { return item[1] });
+        counts.forEach((i) => {
+            total += i
+        })
+        seriesName = seriesName + `\n\nTotal:  ${total}`;
+
         option = {
             legend: {},
             tooltip: {},
@@ -58,6 +67,9 @@ async function getOption(url, seriesName, roseType) {
             series: [{
                 name: seriesName,
                 type: 'bar',
+                label: {
+                    show: showLabel,
+                },
                 encode: {
                     x: 'funcName',
                     y: 'count',
@@ -110,7 +122,7 @@ async function getOption(url, seriesName, roseType) {
 }
 
 /* 自封装HOOK, 使用状态 */
-function useOption(url, seriesName, roseType) {
+function useOption(url, seriesName, roseType, showLabel) {
 
     // let seriesName = 'allFunctionsSubtotal';
     // let url = urlChart1;
@@ -119,13 +131,13 @@ function useOption(url, seriesName, roseType) {
     //定义作用
     async function request() {
         // 等待异步方法执行完再set
-        let option = await getOption(url, seriesName, roseType);
+        let option = await getOption(url, seriesName, roseType, showLabel);
         setOption(option);
     }
     // 该作用 依赖于 url, roseType (roseType 每次点击都会触发)
     useEffect(() => {
         request()
-    }, [url,roseType]); 
+    }, [url, roseType, showLabel]);
     //返回状态
     return option;
 }
@@ -145,16 +157,16 @@ export default (props) => {
      * 南丁格尔图属于图表样式，所以应该定义在本基本图表组件中
      */
     //用于切换饼状图样式（roseType : 指定南丁格尔图类型  radius , area） 
-    const [roseType , setRoseType] = useState({
+    const [roseType, setRoseType] = useState({
         id: 1,
         type: 'radius',
         text: 'radius'
     });
-    const changeRoseTypeHandler = ()=>{
+    const changeRoseTypeHandler = () => {
         let id = roseType.id > 2 ? 0 : roseType.id;
         id++;
         id = id > 2 ? 0 : id;
-        let type = id === 0 ? '' : (id === 1 ? 'radius' : 'area' );
+        let type = id === 0 ? '' : (id === 1 ? 'radius' : 'area');
         let text = type.length === 0 ? 'none' : type;
 
         setRoseType({
@@ -164,9 +176,22 @@ export default (props) => {
         })
     }
 
+    //控制是否展示 各条目标签
+    const [showLabel, setShowLabel] = useState({
+        show: false,
+        text: 'Show Label'
+    });
+    const showLabelHandler = () => {
+        let show = showLabel.show;
+        setShowLabel({
+            show: !show,
+            text: !show ? 'Hide Label' : 'Show Label'
+        })
+    }
+
     //获取并使用状态，只要状态改变，（初始值 => 被赋新值），组件被render
     //这里opt 经历由  {} 到 被赋值远程获取的值
-    const opt = useOption(props.url, props.seriesName, roseType.type);
+    const opt = useOption(props.url, props.seriesName, roseType.type, showLabel.show);
     //设置依赖于 opt 状态的作用，只要状态改变，则执行
     useEffect(() => {
         addOption(props.eleID, opt);
@@ -174,7 +199,16 @@ export default (props) => {
 
     return (
         <div>
-            <Button type="primary" onClick={() => { changeRoseTypeHandler() }}>roseType : {roseType.text}</Button>
+            <Button
+                type="primary"
+                onClick={() => { changeRoseTypeHandler() }}
+                shape="round"
+            >roseType : {roseType.text}</Button>
+            <Button
+                type="primary"
+                onClick={() => { showLabelHandler() }}
+                shape="round"
+            >{showLabel.text}</Button>
             <div id={props.eleID} className="chart-sm" style={props.style}></div>
         </div>
     )

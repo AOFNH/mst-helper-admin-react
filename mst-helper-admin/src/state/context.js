@@ -51,6 +51,11 @@ const charts = {
         url: base + '/hits/getAllFunctionsSubtotalWithinRange/',  //{startDate}/{endDate}
         seriesName: 'all-Functions-Subtotal (DateRange)',
     },
+    api10: {
+        id: 'c10',
+        url: base + '/hits/getSubtotalWithinRangeByTimeUnit/',  //{dateFormat}/{startDate}/{endDate}
+        seriesName: 'Subtotal (TimeUnit)',
+    },
 
 };
 const context = React.createContext({

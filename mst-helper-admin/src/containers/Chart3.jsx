@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../assets/css/charts.css';
 import echarts from 'echarts';
-import { DatePicker , Button} from 'antd';
+import { DatePicker, Button } from 'antd';
 import SearchSelect from './SearchSelect';
 import moment from 'moment';
 
@@ -17,7 +17,7 @@ const { RangePicker } = DatePicker;
  * 该组件没有做拆分复用，具体方法可参见 base 包下的可复用的基本组件 
  */
 
-async function getOption(url, seriesName, roseType) {
+async function getOption(url, seriesName, roseType, showLabel) {
     let option = {};
     await axios({
         method: 'GET',
@@ -28,6 +28,15 @@ async function getOption(url, seriesName, roseType) {
     }).then((response) => {
         let data = response.data;
         // console.log(data);
+        //计算该图表中所有小计 总和
+        let values = data.map((item) => { return Object.values(item) });
+        let total = 0;
+        let counts = values.map((item) => { return item[1] });
+        counts.forEach((i) => {
+            total += i
+        })
+        seriesName = seriesName + `\n\nTotal:  ${total}`;
+
         option = {
             legend: {},
             tooltip: {},
@@ -57,6 +66,9 @@ async function getOption(url, seriesName, roseType) {
                 name: seriesName,
                 type: 'line',
                 smooth: true,
+                label: {
+                    show: showLabel,
+                },
                 encode: {
                     x: 0,
                     y: 1,
@@ -87,17 +99,17 @@ async function getOption(url, seriesName, roseType) {
     return option;
 }
 
-function useOption(id, url, seriesName, roseType) {
+function useOption(id, url, seriesName, roseType, showLabel) {
     const obj = { dataset: [] };
     const [option, setOption] = useState(obj);
     //定义作用
     async function request() {
         // 等待异步方法执行完再set
-        let option = await getOption(url, seriesName, roseType);
+        let option = await getOption(url, seriesName, roseType, showLabel);
         setOption(option);
     }
     //url 变化一次触发一次作用
-    useEffect(() => { request() }, [url, roseType]);
+    useEffect(() => { request() }, [url, roseType, showLabel]);
     //返回状态
     return option;
 }
@@ -207,6 +219,18 @@ export default (props) => {
         setYear(dateString)
     }
 
+    //控制是否展示 各条目标签
+    const [showLabel, setShowLabel] = useState({
+        show: false,
+        text: 'Show Label'
+    });
+    const showLabelHandler = () => {
+        let show = showLabel.show;
+        setShowLabel({
+            show: !show,
+            text: !show ? 'Hide Label' : 'Show Label'
+        })
+    }
 
     //生成 获取数据的 url ，并执行作用
     let fullURL = props.url + fcId;
@@ -219,7 +243,7 @@ export default (props) => {
     } else if (conditionType === 'year') {
         fullURL = fullURL + '/' + year;
     }
-    let opt = useOption(props.eleID, fullURL, props.seriesName, roseType.type);
+    let opt = useOption(props.eleID, fullURL, props.seriesName, roseType.type, showLabel.show);
     useEffect(() => {
         addOption(props.eleID, opt);
     }, [props.eleID, opt, fcId, dateRange, month, timeUnit, year]);
@@ -234,7 +258,16 @@ export default (props) => {
                     value={fcId}
                     style={props.searchSelectStyle}
                 />
-                <Button type="primary" onClick={() => { changeRoseTypeHandler() }}>roseType : {roseType.text}</Button>
+                <Button
+                    type="primary"
+                    onClick={() => { changeRoseTypeHandler() }}
+                    shape="round"
+                >roseType : {roseType.text}</Button>
+                <Button
+                    type="primary"
+                    onClick={() => { showLabelHandler() }}
+                    shape="round"
+                >{showLabel.text}</Button>
                 <div
                     id={props.eleID}
                     className="chart-sm"
@@ -256,7 +289,16 @@ export default (props) => {
                     defaultValue={[moment((preDate), dateFormat), moment((nextDate), dateFormat)]}
                     onChange={(dates, dateStrings) => { rangePickerHandleChange(dates, dateStrings) }}
                 />
-                <Button type="primary" onClick={() => { changeRoseTypeHandler() }}>roseType : {roseType.text}</Button>
+                <Button
+                    type="primary"
+                    onClick={() => { changeRoseTypeHandler() }}
+                    shape="round"
+                >roseType : {roseType.text}</Button>
+                <Button
+                    type="primary"
+                    onClick={() => { showLabelHandler() }}
+                    shape="round"
+                >{showLabel.text}</Button>
                 <div
                     id={props.eleID}
                     className="chart-sm"
@@ -278,7 +320,16 @@ export default (props) => {
                     defaultValue={defaultMonth}
                     onChange={(date, dateString) => { monthPickerHandleChange(date, dateString) }}
                 />
-                <Button type="primary" onClick={() => { changeRoseTypeHandler() }}>roseType : {roseType.text}</Button>
+                <Button
+                    type="primary"
+                    onClick={() => { changeRoseTypeHandler() }}
+                    shape="round"
+                >roseType : {roseType.text}</Button>
+                <Button
+                    type="primary"
+                    onClick={() => { showLabelHandler() }}
+                    shape="round"
+                >{showLabel.text}</Button>
                 <div
                     id={props.eleID}
                     className="chart-sm"
@@ -301,7 +352,16 @@ export default (props) => {
                     value={timeUnit}
                     style={{ width: 200 }}
                 />
-                <Button type="primary" onClick={() => { changeRoseTypeHandler() }}>roseType : {roseType.text}</Button>
+                <Button
+                    type="primary"
+                    onClick={() => { changeRoseTypeHandler() }}
+                    shape="round"
+                >roseType : {roseType.text}</Button>
+                <Button
+                    type="primary"
+                    onClick={() => { showLabelHandler() }}
+                    shape="round"
+                >{showLabel.text}</Button>
                 <div
                     id={props.eleID}
                     className="chart-sm"
@@ -325,7 +385,16 @@ export default (props) => {
                         yearPickerHandleChange(date, dateString)
                     }}
                 />
-                <Button type="primary" onClick={() => { changeRoseTypeHandler() }}>roseType : {roseType.text}</Button>
+                <Button
+                    type="primary"
+                    onClick={() => { changeRoseTypeHandler() }}
+                    shape="round"
+                >roseType : {roseType.text}</Button>
+                <Button
+                    type="primary"
+                    onClick={() => { showLabelHandler() }}
+                    shape="round"
+                >{showLabel.text}</Button>
                 <div
                     id={props.eleID}
                     className="chart-sm"
