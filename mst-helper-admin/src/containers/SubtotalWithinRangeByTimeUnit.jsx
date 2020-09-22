@@ -2,10 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { DatePicker, Select } from 'antd';
 import BaseChartForSubtotal from './base/BaseChartForSubtotal';
 import moment from 'moment';
+import SearchSelect from './SearchSelect';
 const { RangePicker } = DatePicker;
 const { Option } = Select;
 
 export default (props) => {
+
+    //功能id  默认为 0 表示选择所有功能
+    const [funcId, setFuncId] = useState(0);
+    const SearchSelectHandler = (value)=>{
+        setFuncId(value)
+    }
 
     //选择 时间粒度， 粒度的改变 会改变 RangePicker 的类型
     const [selectValue, setSelectValue] = useState('Y-m-d');
@@ -56,12 +63,17 @@ export default (props) => {
     }, [selectValue]);
 
     //生成 完整的 url
-    let  fullURL = props.url + selectValue 
+    let  fullURL = props.url + funcId
+                    + '/'+  selectValue 
                     + '/' + dateRange.startDate
                     + '/' + dateRange.endDate;
-
     return (
         <div>
+            <SearchSelect 
+                detail={props.selectDetail}
+                onChange={SearchSelectHandler}
+                value={funcId}
+            />
             <Select defaultValue={selectValue} onChange={selectHandler}>
                 <Option value="Y-m-d">Date</Option>
                 <Option value="Y-u">Week</Option>

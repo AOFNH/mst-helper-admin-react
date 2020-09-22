@@ -190,7 +190,16 @@ export default (props) => {
     if (props.hideSelect) {
         return (
             <div>
-                <Button type="primary" onClick={() => { changeRoseTypeHandler() }}>roseType : {roseType.text}</Button>
+                <Button
+                    type="primary"
+                    onClick={() => { changeRoseTypeHandler() }}
+                    shape="round"
+                >roseType : {roseType.text}</Button>
+                <Button
+                    type="primary"
+                    onClick={() => { showLabelHandler() }}
+                    shape="round"
+                >{showLabel.text}</Button>
                 <div id={props.eleID} className="chart-sm" style={props.style}></div>
             </div>
         )

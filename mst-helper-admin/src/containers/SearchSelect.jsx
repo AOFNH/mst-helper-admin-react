@@ -17,7 +17,7 @@ async function getOptionsVal(detail) {
 
     let options = [];
     if (detail === 'allFunctions') {
-        for (let i = 1; i < 30; i++) {
+        for (let i = 0; i < 30; i++) {
             options.push({ value: i, text: i })
         }
     } else if (detail === 'users') {
@@ -50,7 +50,7 @@ function useOptionVal(detail) {
 }
 
 export default (props) => {
-
+    //detail 表示 select option 的内容
     let options = useOptionVal(props.detail);
     const children = options.map((item) => {
         return (

@@ -53,7 +53,7 @@ const charts = {
     },
     api10: {
         id: 'c10',
-        url: base + '/hits/getSubtotalWithinRangeByTimeUnit/',  //{dateFormat}/{startDate}/{endDate}
+        url: base + '/hits/getSubtotalWithinRangeByTimeUnitAndFuncId/',  // {functionId}/{dateFormat}/{startDate}/{endDate}
         seriesName: 'Subtotal (TimeUnit)',
     },
 
